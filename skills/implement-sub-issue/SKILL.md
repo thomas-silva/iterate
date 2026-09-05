@@ -1,6 +1,6 @@
 ---
 name: implement-sub-issue
-description: Implement one Linear child issue from its existing plan. Prove FE acceptance with Playwright, push iterative commits to a branch without a PR, then mark the child In Review. Use when the user runs /implement-sub-issue, asks to implement a Linear sub-issue or child issue, or to execute a planned Linear child.
+description: Implement one Linear child issue from its existing plan. Prove FE acceptance with Playwright, commit locally on a stacked branch without pushing or opening a PR, then mark the child In Review. Use when the user runs /implement-sub-issue, asks to implement a Linear sub-issue or child issue, or to execute a planned Linear child.
 ---
 
 # Implement Sub-Issue
@@ -19,14 +19,15 @@ Implement one Linear child from its existing plan. The parent is the feature; th
 
 - Implement the child's Intended outcome, Scope, and Acceptance. Do not expand scope, edit the parent, or create a sibling.
 - Prove FE Acceptance rows with Playwright tests only.
-- Commit and push to a branch as you go (Linear git branch name from `get_issue`). Do not open a PR.
+- Base = latest Done sibling's branch, else the repo default branch. Create or check out the Linear git branch (`get_issue`) from that base.
+- Commit locally as you go. Do not push. Do not open a PR.
 - When every Acceptance row passes, `save_issue` the child `state` to In Review. Do not complete it.
 
 ## Workflow
 
 1. Resolve the child. If it is already In Review, completed, or canceled, stop.
-2. Check out the child's Linear git branch.
+2. Create or check out the child's Linear git branch from the stack base.
 3. Implement included scope.
 4. Prove FE rows with Playwright; prove any non-FE rows as the child's Proven by states.
-5. Commit and push. Repeat 3–5 until Acceptance passes.
+5. Commit locally. Repeat 3–5 until Acceptance passes.
 6. Set the child to In Review. Reply with the child URL and branch.
