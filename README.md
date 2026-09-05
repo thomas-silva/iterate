@@ -20,6 +20,8 @@ Repeat until the parent is done.
 
 Slash commands: `/plan-sub-issue`, `/implement-sub-issue`, `/review-sub-issue`.
 
+Canonical files live in `skills/`. Cursor Cloud (and other agents that only scan the repo) load them from `.cursor/skills/`, which points at the same folders.
+
 ## You need
 
 - [Linear](https://linear.app) with MCP connected in the agent
