@@ -38,6 +38,8 @@ Stop, and do not plan, when:
 
 Reply with the parent URL and the stop reason. Do not complete the parent.
 
+Complete means ready to propose for review. The separate `propose-parent` skill creates the PR and moves the parent to In Review when invoked.
+
 Otherwise a child is needed.
 
 ## Resume

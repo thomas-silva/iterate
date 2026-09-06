@@ -28,4 +28,10 @@ Implement one Linear child from its existing plan. The parent is the feature; th
 4. Implement included scope.
 5. Prove FE rows with Playwright; prove any non-FE rows as the child's Proven by states.
 6. Commit and push. Do not open a PR. Repeat 4–6 until Acceptance passes.
-7. Set the child to In Review. Reply with the child URL and branch.
+7. Persist acceptance evidence on the child as below, then set it to In Review. Reply with the child URL and branch.
+
+## Persist evidence
+
+Before advancing the child, `save_comment` on that child mapping each Acceptance row to its result and supporting proof. Include the tested commit and environment. Upload screenshots for visible UI outcomes; save test results or relevant logs in the comment or link durable artifacts. Screenshots supplement behavioral checks. Temporary workspace paths do not count.
+
+Read back the comment and verify its attachments and links are accessible. If evidence cannot be saved or accessed, record the blocker on the child if possible, report it, and stop without advancing its status.

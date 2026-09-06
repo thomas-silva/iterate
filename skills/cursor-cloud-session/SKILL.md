@@ -57,5 +57,5 @@ Do not poll, stream, or `get_command_or_subagent_output` the wait. `watch-landed
 
 ## After wakeup
 
-- `DONE`: re-read the Linear child and review comments. If it is not Done, report No progress; if review left a P1, report Blocked. Otherwise report child URL, branch, agent URL. Do not dump SSE.
+- `DONE`: re-read the Linear child and review comments. If it is not Done, report No progress; if review left a P1, report Blocked. Verify the review comment maps every Acceptance row to results and durable proof, identifies the tested commit and environment, and its attachments and links are accessible. Missing or inaccessible evidence → report No progress and stop. Otherwise report child URL, branch, agent URL. Do not dump SSE.
 - `FAILED` / `CANCELLED`: inspect with `cursor-cloud-agents` (`conversation.ts`), report, do not relaunch.
