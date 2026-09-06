@@ -45,7 +45,9 @@ All children of a parent share one branch — the parent's Linear git branch. Im
 
 The loop stops when the parent's Acceptance is proven live; it does not mark the parent Done. Each draft must advance unmet parent Acceptance or resolve a risk that changes what to build.
 
-Then `/propose-parent` creates or updates the PR with an outcome and implementation debrief and curated media evidence. It moves the parent from In Progress to In Review; it does not merge or mark the parent Done.
+`/review-parent` checks the combined outcome, integration, architecture, and regressions, saving its verdict and evidence on the parent without changing its status.
+
+Then `/propose-parent` requires that review against the current branch and creates or updates the PR with an outcome and implementation debrief and curated media evidence. It moves the parent from In Progress to In Review; it does not merge or mark the parent Done.
 
 The watcher waits for the Cloud run to finish and new commits to reach the parent branch. A review-only resume can finish without new commits if the existing implementation remains on that branch. After wakeup, the main agent checks the child's state and review comments before continuing. Planning reads the latest child's review comments and relevant sibling comments.
 
@@ -54,6 +56,7 @@ The watcher waits for the Cloud run to finish and new commits to reach the paren
 | Skill | What it does |
 |---|---|
 | [`iterate-parent`](skills/iterate-parent/SKILL.md) | Main-agent loop: done check, plan here (approval starts Cloud), wait for new commits. Cap 20. |
+| [`review-parent`](skills/review-parent/SKILL.md) | Reviews the combined parent implementation and saves evidence and a readiness verdict without changing its status. |
 | [`propose-parent`](skills/propose-parent/SKILL.md) | Turns a passing parent done check into a PR with a concise debrief and relevant media evidence, then moves the parent to In Review. |
 | [`plan-sub-issue`](skills/plan-sub-issue/SKILL.md) | Drafts the next Linear child. No code. Saves only after you approve. |
 | [`implement-sub-issue`](skills/implement-sub-issue/SKILL.md) | Builds that child on the parent branch, proves frontend rows with Playwright, commits and pushes, sets In Progress then In Review. |
@@ -62,7 +65,7 @@ The watcher waits for the Cloud run to finish and new commits to reach the paren
 | [`cursor-cloud-session`](skills/cursor-cloud-session/SKILL.md) | Grok helper: launch a Cursor Cloud agent on the current repo plus iterate to implement and review a Linear child, then wait until new commits are on the parent branch. |
 | [`cursor-cloud-agents`](skills/cursor-cloud-agents/SKILL.md) | Grok helper: inspect existing Cursor Cloud agents (list, conversation, stream summary). |
 
-Slash commands: `/iterate-parent`, `/propose-parent`, `/plan-sub-issue`, `/implement-sub-issue`, `/review-sub-issue`, `/implement-review-sub-issue`. Cursor Cloud: `/cursor-cloud-session`, `/cursor-cloud-agents`.
+Slash commands: `/iterate-parent`, `/review-parent`, `/propose-parent`, `/plan-sub-issue`, `/implement-sub-issue`, `/review-sub-issue`, `/implement-review-sub-issue`. Cursor Cloud: `/cursor-cloud-session`, `/cursor-cloud-agents`.
 
 Canonical files live in `skills/`. Cursor Cloud (and other agents that only scan the repo) load them from `.cursor/skills/`, which points at the same folders.
 

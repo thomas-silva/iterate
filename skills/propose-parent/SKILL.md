@@ -5,7 +5,7 @@ description: Propose a Linear parent for review after its done check passes. Cre
 
 # Propose Parent
 
-A passing done check means ready to propose for review. Create the PR and move the Linear parent to In Review. Do not merge or mark the parent Done.
+A passing done check and parent review mean ready to propose for review. Create the PR and move the Linear parent to In Review. Do not merge or mark the parent Done.
 
 ## Resolve
 
@@ -15,11 +15,11 @@ A passing done check means ready to propose for review. Create the PR and move t
 
 ## Workflow
 
-1. Confirm the [iterate-parent done check](../iterate-parent/SKILL.md#done-check-before-every-plan) passes against the current parent branch: every parent Acceptance row is proven on the running system. Child states alone are insufficient. Resolve stale or missing proof with focused live checks. If acceptance is unproven or a blocking finding remains, report the gap and stop without advancing the parent.
+1. Require a saved ready-to-propose verdict from [review-parent](../review-parent/SKILL.md) covering the current parent-branch head and intended PR base commits. If absent, run that skill; if either commit changed, review the subsequent changes and rerun affected checks, then save the updated verdict. This includes the parent done check: every parent Acceptance row is proven on the running system. If the review is blocked, report the gap and stop without publishing the PR or advancing the parent.
 2. Read the final diff and synthesize the parent outcome and implementation. Explain resulting behavior, consequential design choices, tradeoffs, and meaningful limitations. Organize by outcome, not child chronology; link children for detail.
-3. Curate the strongest relevant media from child evidence. Prefer a few screenshots or recordings that demonstrate the parent outcome. Verify they represent the final implementation; capture fresh evidence where needed. Map every parent Acceptance row to its demonstrated result and supporting proof. Media supplements behavioral tests; it does not replace them.
+3. Curate the strongest relevant media from parent and child evidence. Prefer a few screenshots or recordings that demonstrate the parent outcome. Verify they represent the final implementation; capture fresh evidence where needed. Map every parent Acceptance row to its demonstrated result and supporting proof. Media supplements behavioral tests; it does not replace them.
 4. Prepare the PR title and description using the structure below, adapted to the repo template. Identify the tested commit and environment. Embed useful screenshots, attach or link playable recordings with captions explaining what each proves, and link durable test results or logs. Verify reviewers can access the media and links; temporary workspace paths do not count. If evidence cannot be preserved or accessed, report the blocker and stop without advancing the parent.
-5. Ensure the reviewed parent-branch commits are pushed, then create or update the PR. Do not include unrelated local changes. Read back the PR and verify its base, head, description, and evidence. If publishing fails, report the failure and leave the parent's status unchanged.
+5. Ensure the reviewed parent-branch commits are pushed and the head and base still match the saved review verdict, then create or update the PR. If either changed, refresh the review first. Do not include unrelated local changes. Read back the PR and verify its base, head, description, and evidence. If publishing fails, report the failure and leave the parent's status unchanged.
 6. Save a parent comment linking the PR with a brief outcome and evidence summary. Then move the parent from In Progress to In Review (`save_issue`); if already In Review, leave that state. For any other state, report the mismatch without changing it. Preserve the parent description and child states. Report the PR URL, parent URL, and actual status; never claim a failed update succeeded.
 
 ## PR debrief
