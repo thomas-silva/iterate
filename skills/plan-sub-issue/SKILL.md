@@ -11,20 +11,21 @@ Create or revise one Linear child issue. NO code. The parent issue is the featur
 
 - Resolve the parent from the user's Linear URL or ID. If that issue already has a parent, the parent is the feature unless the user named the child to revise.
 - Read the parent (`get_issue`, include relations). Read its comments. List children (`list_issues` with `parentId`).
+- Read the latest child's review comments and relevant sibling comments (`list_comments`). Use demonstrated outcomes, evidence, lessons, and remaining findings to choose the next slice.
 - Inspect the repo only enough to name live eval surfaces. Use `./fixtures/` when present; do not invent fixtures.
-- An incomplete child exists → revise the oldest incomplete. All children completed/canceled, or none → create the next. Never a second in-flight child.
+- An incomplete child exists → revise it. All children completed/canceled, or none → create the next. Never a second in-flight child.
 - Inherit team, project, and priority from the parent. Do not edit the parent.
 - Reference the parent; do not repeat its stories, acceptance, or out-of-scope.
 - No implementation details, file inventories, or code-level prescriptions.
-- Write only the Linear child.
+- Write only the Linear child, and only after the user approves the draft.
 
 ## Sub-issue standard
 
 Each child must:
 
-- Progress the parent directly, or learn how to course-correct.
-- Produce an outcome another agent can evaluate end to end on a running system (not tests alone).
-- Define in/out without prescribing code structure.
+- Cover a subset of unmet parent Acceptance, or a Risk whose answer would change what to build.
+- Not contradict parent boundaries or Out of Scope, or repeat/expand the parent.
+- Produce an outcome another agent can evaluate end to end on a running system (not tests alone). Define in/out without prescribing code.
 - Stay feasible in one agent pass.
 
 ## Scoping rubric
@@ -37,8 +38,9 @@ One dominant theme, bounded blast radius, compatibility/reversibility only when 
 2. If the parent has no observable outcome, stop. The parent needs that first.
 3. Choose Risk or Coverage from remaining parent acceptance vs children vs what the product actually does.
 4. Title is the observable delta. Not "Implement…", not "Phase N".
-5. `save_issue`: create with `parentId`, `team`, `project`, and `priority` from the parent, `state` Todo; or update the in-flight child. Description uses the template.
-6. Reply with the child URL and one sentence on why this slice is next.
+5. Present the draft (title + description). Stop. Do not `save_issue` until the user approves.
+6. On approval, `save_issue`: create with `parentId`, `team`, `project`, and `priority` from the parent, `state` In Progress; or update the in-flight child. Description uses the template.
+7. Reply with the child URL and one sentence on why this slice is next.
 
 ## Template
 
