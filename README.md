@@ -6,40 +6,39 @@ A **parent issue** is the feature. A **child issue** is the next piece, small en
 
 ```mermaid
 flowchart LR
-    Plan["Plan child"] --> Approve{"You approve"}
+    Draft["Draft child"] --> Approve{"You approve"}
     Approve --> Implement["Implement"]
     Implement --> Review["Review"]
-    Review -->|Parent not done yet| Plan
-    Review -->|Parent outcome works| Finish["Finish: one PR"]
+    Review -->|Parent not covered yet| Draft
+    Review -->|Parent covered| Finish{"You approve finishing"}
+    Finish --> PR["Finish: one PR"]
 ```
 
-`/iterate-parent` runs this loop. It keeps a few rules:
+`/iterate-parent` runs this whole loop. It looks at the parent and does the next thing, pausing whenever it needs you. It keeps a few rules:
 
-- **One child at a time**, and **only you approve a child** before work starts.
+- **One child at a time.**
+- **You approve each child** before work starts, and **you decide when to finish**.
 - **Linear status shows where things stand** (Todo → In Progress → In Review → Done), so you can re-run after any interruption.
 - **All children share the parent's branch.** Commits name their issue.
-- **Proven means seen working** on the running app, with evidence saved in Linear.
+- **Proven means seen working** on the running system, with evidence saved in Linear.
 - **If something is unclear or stuck, the agent stops and tells you why.**
-
-When the parent's outcome works, `/finish-parent` reviews the whole feature, opens one PR, and moves the parent to In Review.
 
 ## Skills
 
 | Skill | What it does |
 |---|---|
-| [`iterate-parent`](skills/iterate-parent/SKILL.md) | Runs the loop. |
-| [`plan-sub-issue`](skills/plan-sub-issue/SKILL.md) | Drafts the next child and gets your approval. |
+| [`iterate-parent`](skills/iterate-parent/SKILL.md) | Runs the loop and drafts each child with you. |
 | [`implement-sub-issue`](skills/implement-sub-issue/SKILL.md) | Builds the child and proves it works. |
 | [`review-sub-issue`](skills/review-sub-issue/SKILL.md) | Reviews and simplifies the child, then marks it Done. |
-| [`finish-parent`](skills/finish-parent/SKILL.md) | Reviews the whole feature and opens the PR. |
+| [`finish-parent`](skills/finish-parent/SKILL.md) | Reviews the whole feature, opens the PR, moves the parent to In Review. |
 
-Implement and review run as subagents when the agent supports them. Canonical files live in `skills/`; `.cursor/skills/` links to them.
+Implement and review run as subagents when the agent supports them. Each skill also works on its own. Canonical files live in `skills/`; `.cursor/skills/` links to them.
 
 ## You need
 
 - [Linear](https://linear.app) connected to the agent
 - A parent issue with an outcome and Acceptance criteria
-- Playwright, if a child has UI acceptance rows
+- A way to see the running system; Playwright helps for UI checks
 
 ## Install
 
