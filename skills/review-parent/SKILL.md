@@ -18,7 +18,7 @@ Review the feature as a whole after its children are implemented. Child reviews 
 
 1. Read the combined diff, using adjacent code as context.
 2. Confirm the running system contains the reviewed implementation.
-3. Verify every parent Acceptance row end to end. Reuse child evidence where it still proves the final behavior; run fresh checks where integration or subsequent changes could invalidate it.
+3. Verify every parent Acceptance row end to end under [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence). Reuse child evidence where it still proves the final behavior; run fresh checks where integration or subsequent changes could invalidate it.
 4. Review the criteria below. Report actionable findings ranked by concrete impact, with code locations or live reproduction evidence.
 5. Fix findings within the parent's scope, preferring deletion, consolidation, or reuse where these simplify the correction. Record out-of-scope findings without expanding the feature.
 6. Re-review fixes and run affected acceptance and regression checks. Commit and push review changes on the parent branch. Exclude unrelated local changes.
@@ -48,7 +48,7 @@ Regressions:
 
 ## Evidence and readiness
 
-Persist evidence on the parent for both passing and blocked reviews. Map acceptance rows to observed results and supporting proof. Upload relevant screenshots or recordings; save test results or logs directly or link durable artifacts. Temporary workspace paths do not count. Media supplements behavioral checks.
+Prove and persist parent acceptance as described in [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence), on the parent, for both passing and blocked reviews. Recordings are welcome where they show the combined flow.
 
 Ready to propose requires proven parent acceptance, resolved in-scope findings, and accessible evidence. If checks or evidence persistence are blocked, record what remains on the parent if possible and report blocked.
 

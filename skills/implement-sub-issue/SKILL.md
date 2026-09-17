@@ -1,11 +1,11 @@
 ---
 name: implement-sub-issue
-description: Implement one Linear child issue from its existing plan. Prove FE acceptance with Playwright, commit and push on the parent's branch without opening a PR, then mark the child In Review. Use when the user runs /implement-sub-issue, asks to implement a Linear sub-issue or child issue, or to execute a planned Linear child.
+description: Implement one Linear child issue from its existing plan. Prove acceptance on the running system, commit and push on the parent's branch without opening a PR, then mark the child In Review. Use when the user runs /implement-sub-issue, asks to implement a Linear sub-issue or child issue, or to execute a planned Linear child.
 ---
 
 # Implement Sub-Issue
 
-Implement one Linear child from its existing plan. The parent is the feature; the child is the step.
+Implement one Linear child from its existing plan. The parent is the feature; the child is the next piece of it.
 
 ## Resolve
 
@@ -18,20 +18,24 @@ Implement one Linear child from its existing plan. The parent is the feature; th
 ## Constraints
 
 - Implement the child's Intended outcome, Scope, and Acceptance. Do not expand scope, edit the parent, or create a sibling.
-- Prove FE Acceptance rows with Playwright tests only. Do not complete the child.
+- Do not mark the child Done.
 
 ## Workflow
 
-1. Resolve the child. If it is already In Review, completed, or canceled, stop.
-2. Check out the parent's Linear git branch (`get_issue` on the parent), creating it from the repo default branch if it does not exist.
+1. Resolve the child. If it is In Review, Done, or Canceled, stop and report its status.
+2. Check out the parent's Linear git branch (`get_issue` on the parent), creating it from the repo default branch if it does not exist. If the child is already In Progress with commits on that branch, continue from them.
 3. Set the child to In Progress if it is not already.
-4. Implement included scope.
-5. Prove FE rows with Playwright; prove any non-FE rows as the child's Proven by states.
-6. Commit and push. Do not open a PR. Repeat 4–6 until Acceptance passes.
-7. Persist acceptance evidence on the child as below, then set it to In Review. Reply with the child URL and branch.
+4. Implement the next part of included scope.
+5. Prove the affected Acceptance rows as described in [Proof and evidence](#proof-and-evidence).
+6. Commit and push after each passing part. Do not open a PR. Repeat 4–6 until every Acceptance row passes.
+7. Persist evidence on the child, then set it to In Review. Reply with the child URL, branch, and status.
 
-## Persist evidence
+## Proof and evidence
 
-Before advancing the child, `save_comment` on that child mapping each Acceptance row to its result and supporting proof. Include the tested commit and environment. Upload screenshots for visible UI outcomes; save test results or relevant logs in the comment or link durable artifacts. Screenshots supplement behavioral checks. Temporary workspace paths do not count.
+The shared rule for every skill in this repo.
 
-Read back the comment and verify its attachments and links are accessible. If evidence cannot be saved or accessed, record the blocker on the child if possible, report it, and stop without advancing its status.
+**Proof:** every Acceptance row is proven on the running system. A Playwright run against the live app counts for UI rows. Unit tests or mocks alone do not.
+
+**Evidence:** before advancing an issue, `save_comment` on it mapping each Acceptance row to its result and supporting proof. Include the tested commit and environment. Upload screenshots for visible UI outcomes; save test results or relevant logs in the comment or link durable artifacts. Screenshots supplement behavioral checks. Temporary workspace paths do not count.
+
+Read back the comment and verify its attachments and links are accessible. If evidence cannot be saved or accessed, record the blocker on the issue if possible, report it, and stop without advancing its status.

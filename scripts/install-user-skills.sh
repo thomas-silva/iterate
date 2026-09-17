@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Upsert every skills/*/SKILL.md into user-level Grok, Cursor, Claude, and Codex dirs.
+# Upsert every skills/*/SKILL.md into user-level Grok, Cursor, Claude, and Codex dirs,
+# after pruning links to skills that no longer exist.
 set -euo pipefail
 
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -19,6 +20,27 @@ upsert() {
   fi
   ln -s "$from" "$to"
 }
+
+prune() {
+  local dest=$1 link target
+  [ -d "$dest" ] || return 0
+  for link in "$dest"/*; do
+    [ -L "$link" ] || continue
+    target=$(readlink "$link")
+    case "$target" in
+      "$src"/*)
+        if [ ! -e "$link" ]; then
+          rm "$link"
+          echo "pruned $link"
+        fi
+        ;;
+    esac
+  done
+}
+
+for dest in "$grok" "$cursor" "$claude" "$codex"; do
+  prune "$dest"
+done
 
 count=0
 for dir in "$src"/*; do

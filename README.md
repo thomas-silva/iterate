@@ -1,90 +1,60 @@
 # iterate
 
-Agent skills for one Linear child at a time, plus a parent loop that runs them.
+Agent skills for building a Linear feature one child issue at a time.
 
-A **parent issue** is the feature. A **child issue** is the next slice one agent can finish.
+A **parent issue** is the feature. A **child issue** is the next piece one agent can finish.
 
-`/iterate-parent` runs one child at a time. The main agent plans here; Cursor Cloud implements and reviews.
+**Every child plan waits for your approval before any work starts.** The agent asks you in whatever way its platform allows. If it can't reach you, it stops and shows you the draft.
+
+`/iterate-parent` runs the loop. The main agent plans each child with you, then runs implement and review as separate subagents.
 
 ```mermaid
 flowchart LR
-    Parent["Parent issue"] --> Check
-
-    subgraph Main["Main agent — serial iterations"]
-        Check{"Done check"} -->|All parent Acceptance proven live|Stop["Stop reason"]
-        Check -->|Blocked, unsliceable, stuck, no progress, or cap|Stop
-        Check -->|More work needed|State{"Child state"}
-        State -->|None or Todo|Plan["Child draft"]
-        Plan --> Approval{"User approval"}
-        Approval -->|Revisions requested|Plan
-        Approval -->|Pending|Wait["Pending draft"]
-        Wait -->|User response|Approval
-        Approval -->|Approved|Child["Saved Linear child"]
-        Approval -->|Declined|Stop
-        Monitor["Branch and run check"] --> Result{"Child and review status"}
-        Result -->|Run finished, commits verified, child Done, no P1|Check
-        Result -->|Failure, cancellation, child not Done, or P1|Stop
-    end
-
-    subgraph Cloud["Cursor Cloud — implement then review"]
-        Implement["Implementation + acceptance proof"] -->|Commit and push; In Review|Review["Review subagent"]
-    end
-
-    Child --> Implement
-    State -->|In Progress: launch Cloud|Implement
-    State -->|In Review: launch Cloud at review|Review
-    Review -->|Commit and push any edits; child Done|Monitor
-    Implement -->|Failure or cancellation|Monitor
-    Review -->|Failure or cancellation|Monitor
-    Review --> Comments["Child review comments: outcome, evidence, lessons, findings"]
-    Comments -.-> Plan
-    Comments -.-> Result
+    Parent["Parent issue"] --> Check{"Stop check"}
+    Check -->|More work needed| Plan["Plan child"]
+    Plan --> Approval{"Your approval"}
+    Approval -->|Approved| Implement["Implement subagent"]
+    Implement --> Review["Review subagent"]
+    Review --> Check
+    Check -->|Parent Acceptance proven| Done["Ready for /review-parent"]
 ```
 
-All children of a parent share one branch — the parent's Linear git branch. Implement and review commit and push on it. Child iterations do not open PRs.
+Any failure (no progress, a P1 left by review, no approval) stops the loop with a reason.
 
-The loop stops when the parent's Acceptance is proven live; it does not mark the parent Done. Each draft must advance unmet parent Acceptance or resolve a risk that changes what to build.
+All children share one branch, the parent's Linear git branch. Implement and review commit and push on it. Children do not open PRs.
 
-`/review-parent` checks the combined outcome, integration, architecture, and regressions, saving its verdict and evidence on the parent without changing its status.
+Linear and that branch are the only state. If a session crashes or closes, run `/iterate-parent` again and it picks up at the right step. It runs in any agent with subagents, on your machine or in a cloud session.
 
-Then `/propose-parent` requires that review against the current branch and creates or updates the PR with an outcome and implementation debrief and curated media evidence. It moves the parent from In Progress to In Review; it does not merge or mark the parent Done.
-
-The watcher waits for the Cloud run to finish and new commits to reach the parent branch. A review-only resume can finish without new commits if the existing implementation remains on that branch. After wakeup, the main agent checks the child's state and review comments before continuing. Planning reads the latest child's review comments and relevant sibling comments.
+When the loop finishes, `/review-parent` checks the combined feature and saves a verdict on the parent. Then `/propose-parent` opens the PR and moves the parent to In Review. Nothing marks the parent Done.
 
 ## Skills
 
 | Skill | What it does |
 |---|---|
-| [`iterate-parent`](skills/iterate-parent/SKILL.md) | Main-agent loop: done check, plan here (approval starts Cloud), wait for new commits. Cap 20. |
-| [`review-parent`](skills/review-parent/SKILL.md) | Reviews the combined parent implementation and saves evidence and a readiness verdict without changing its status. |
-| [`propose-parent`](skills/propose-parent/SKILL.md) | Turns a passing parent done check into a PR with a concise debrief and relevant media evidence, then moves the parent to In Review. |
-| [`plan-sub-issue`](skills/plan-sub-issue/SKILL.md) | Drafts the next Linear child. No code. Saves only after you approve. |
-| [`implement-sub-issue`](skills/implement-sub-issue/SKILL.md) | Builds that child on the parent branch, proves frontend rows with Playwright, commits and pushes, sets In Progress then In Review. |
-| [`review-sub-issue`](skills/review-sub-issue/SKILL.md) | Reviews the running system, fixes in-scope findings with simplification as a core criterion, commits and pushes, and saves evidence and remaining findings. Marks Done only when in-scope findings are resolved and acceptance passes. |
-| [`implement-review-sub-issue`](skills/implement-review-sub-issue/SKILL.md) | Cloud sequencer: implement, then review as a subagent. |
-| [`cursor-cloud-session`](skills/cursor-cloud-session/SKILL.md) | Grok helper: launch a Cursor Cloud agent on the current repo plus iterate to implement and review a Linear child, then wait until new commits are on the parent branch. |
-| [`cursor-cloud-agents`](skills/cursor-cloud-agents/SKILL.md) | Grok helper: inspect existing Cursor Cloud agents (list, conversation, stream summary). |
+| [`iterate-parent`](skills/iterate-parent/SKILL.md) | The loop: stop check, plan with your approval, implement subagent, review subagent. Cap 20. |
+| [`plan-sub-issue`](skills/plan-sub-issue/SKILL.md) | Drafts the next child. No code. Saves only after you approve. |
+| [`implement-sub-issue`](skills/implement-sub-issue/SKILL.md) | Builds the child on the parent branch, proves acceptance on the running system, pushes, sets In Review. Holds the shared proof and evidence rules. |
+| [`review-sub-issue`](skills/review-sub-issue/SKILL.md) | Reviews the child on the running system, fixes in-scope findings (simplification is a core criterion), saves evidence, sets Done. |
+| [`review-parent`](skills/review-parent/SKILL.md) | Reviews the whole feature and saves a ready-to-propose or blocked verdict on the parent. |
+| [`propose-parent`](skills/propose-parent/SKILL.md) | Requires that verdict, then opens or updates the PR and moves the parent to In Review. |
 
-Slash commands: `/iterate-parent`, `/review-parent`, `/propose-parent`, `/plan-sub-issue`, `/implement-sub-issue`, `/review-sub-issue`, `/implement-review-sub-issue`. Cursor Cloud: `/cursor-cloud-session`, `/cursor-cloud-agents`.
-
-Canonical files live in `skills/`. Cursor Cloud (and other agents that only scan the repo) load them from `.cursor/skills/`, which points at the same folders.
+Canonical files live in `skills/`. `.cursor/skills/` links to the same folders for agents that only scan the repo.
 
 ## You need
 
-- [Linear](https://linear.app) with MCP connected in the agent
+- [Linear](https://linear.app) connected to the agent (MCP)
 - A parent issue that already names an observable outcome
-- Playwright, if the child has frontend acceptance rows
-- `export CURSOR_API_KEY` for `/iterate-parent` and `/cursor-cloud-session`
+- Playwright, if a child has UI acceptance rows
 
 ## Install
 
-From a clone, symlink `skills/` into each agent's user directory (re-run to upsert):
+From a clone, symlink `skills/` into each agent's user directory. Re-run to update; it also removes links to skills that no longer exist.
 
 ```bash
 ./scripts/install-user-skills.sh
 ```
 
-Grok (`~/.grok/skills`), Cursor (`~/.cursor/skills`), Claude Code (`~/.claude/skills`), Codex (`~/.codex/skills`).
+Targets: Grok (`~/.grok/skills`), Cursor (`~/.cursor/skills`), Claude Code (`~/.claude/skills`), Codex (`~/.codex/skills`).
 
 From GitHub:
 

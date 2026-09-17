@@ -5,13 +5,15 @@ description: Create or revise the next Linear child issue as the next one-agent-
 
 # Plan Sub-Issue
 
-Create or revise one Linear child issue. NO code. The parent issue is the feature goal; the child is the next advancing task.
+**Every child draft needs the real user's approval before anything proceeds.** Reach the user in the best way your platform allows: ask in the conversation, use a question or notification tool, or leave a comment where they will see it. Only the user can approve. Never approve on their behalf, treat silence as approval, or let a subagent approve. Run nothing while waiting. If you cannot reach the user, stop with Awaiting approval and include the draft in your reply.
+
+Create or revise one Linear child issue. NO code. The parent issue is the feature goal; the child is the next piece of it.
 
 ## Guidelines
 
 - Resolve the parent from the user's Linear URL or ID. If that issue already has a parent, the parent is the feature unless the user named the child to revise.
 - Read the parent (`get_issue`, include relations). Read its comments. List children (`list_issues` with `parentId`).
-- Read the latest child's review comments and relevant sibling comments (`list_comments`). Use demonstrated outcomes, evidence, lessons, and remaining findings to choose the next slice.
+- Read the latest child's review comments and relevant sibling comments (`list_comments`). Use demonstrated outcomes, evidence, lessons, and remaining findings to choose the next child.
 - Inspect the repo only enough to name live eval surfaces. Use `./fixtures/` when present; do not invent fixtures.
 - An incomplete child exists → revise it. All children completed/canceled, or none → create the next. Never a second in-flight child.
 - Inherit team, project, and priority from the parent. Do not edit the parent.
@@ -27,10 +29,11 @@ Each child must:
 - Not contradict parent boundaries or Out of Scope, or repeat/expand the parent.
 - Produce an outcome another agent can evaluate end to end on a running system (not tests alone). Define in/out without prescribing code.
 - Stay feasible in one agent pass.
+- Be provable under [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence).
 
 ## Scoping rubric
 
-One dominant theme, bounded blast radius, compatibility/reversibility only when step-specific. A material uncertainty (its answer would change what to build) → Risk; else Coverage. Not this slice: unmet parent acceptance → Deferred; another issue → omit; never this feature → parent Out of Scope (do not edit the parent).
+One dominant theme, bounded blast radius, compatibility/reversibility only when step-specific. A material uncertainty (its answer would change what to build) → Risk; else Coverage. Not this child: unmet parent acceptance → Deferred; another issue → omit; never this feature → parent Out of Scope (do not edit the parent).
 
 ## Workflow
 
@@ -38,7 +41,7 @@ One dominant theme, bounded blast radius, compatibility/reversibility only when 
 2. If the parent has no observable outcome, stop. The parent needs that first.
 3. Choose Risk or Coverage from remaining parent acceptance vs children vs what the product actually does.
 4. Title is the observable delta. Not "Implement…", not "Phase N".
-5. Present the draft (title + description). Stop. Do not `save_issue` until the user approves.
+5. Present the draft (title + description) and get the user's approval as described at the top. Do not `save_issue` before approval.
 6. On approval, `save_issue`: create with `parentId`, `team`, `project`, and `priority` from the parent, `state` In Progress; or update the in-flight child. Description uses the template.
 7. Reply with the child URL and one sentence on why this slice is next.
 
@@ -64,7 +67,7 @@ Included:
 - [2–4 bullets total.]
 
 Deferred:
-- [Unmet parent acceptance this slice does not cover, only if a reader would expect it in this pass.]
+- [Unmet parent acceptance this child does not cover, only if a reader would expect it in this pass.]
 - [Omit the heading when none.]
 
 Guardrails:

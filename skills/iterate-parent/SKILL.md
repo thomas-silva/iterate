@@ -1,13 +1,15 @@
 ---
 name: iterate-parent
-description: Run a Linear parent as serial child iterations. The main agent plans each child in-session, gets approval, then creates the Linear child and launches a Cursor Cloud implement+review session, waiting until new commits are on the parent branch. Use when the user runs /iterate-parent, asks to iterate a parent issue, or to loop plan-implement-review until the parent looks complete.
+description: Run a Linear parent as serial child iterations. The main agent plans each child in-session, gets the user's approval on every child draft, then runs implement and review as separate subagents. Use when the user runs /iterate-parent, asks to iterate a parent issue, or to loop plan-implement-review until the parent looks complete.
 ---
 
 # Iterate Parent
 
-Run the parent loop. You plan. You do not implement or review.
+**Every child draft needs the real user's approval before anything proceeds.** Reach the user in the best way your platform allows: ask in the conversation, use a question or notification tool, or leave a comment where they will see it. Only the user can approve. Never approve on their behalf, treat silence as approval, or let a subagent approve. Run nothing while waiting. If you cannot reach the user, stop with Awaiting approval and include the draft in your reply.
 
-The parent is the feature. Each iteration is one child. Never a second in-flight child. Do not edit the parent. Do not mark the parent Done.
+Run the parent loop. You plan. Subagents implement and review.
+
+The parent is the feature. Work one child at a time; never a second in-flight child. Do not edit the parent. Do not mark the parent Done.
 
 ## Resolve
 
@@ -17,44 +19,45 @@ The parent is the feature. Each iteration is one child. Never a second in-flight
 - Read parent, children, and comments.
 - Cap: 20 children this run unless the user named another cap.
 
-## Skills
+## Next step
 
-- Plan: follow `plan-sub-issue` in this session. That approval also starts the cloud session.
-- Ship: follow `cursor-cloud-session` (Cloud runs `implement-review-sub-issue`).
-- Inspect: `cursor-cloud-agents` on `FAILED` / `CANCELLED`.
+Linear and the parent branch are the only state. Choose the next step from the latest child:
 
-## Done check (before every plan)
+| Latest child | Next |
+|---|---|
+| None, or all Done or Canceled | Stop check, then plan |
+| Todo | Plan (revise that child) |
+| In Progress | Implement |
+| In Review | Review |
 
-Re-read the parent Acceptance table and the running system. Linear child state is not enough.
-
-Stop, and do not plan, when:
-
-- Complete — every parent Acceptance row is proven live
-- Unsliceable — parent has no observable outcome
-- Stuck — remainder exists but is not a one-pass child
-- Blocked — last review left a P1
-- No progress — plan or the cloud session stopped without advancing a child
-- Cap — named cap reached
-
-Reply with the parent URL and the stop reason. Do not complete the parent.
-
-Complete means ready to propose for review. The separate `propose-parent` skill creates the PR and moves the parent to In Review when invoked.
-
-Otherwise a child is needed.
-
-## Resume
-
-If an incomplete child exists, do not start a second:
-
-- In Review or In Progress → skip to cloud
-- Todo → plan (revises that child)
-
-Then continue the loop at that step.
+After a crash or interruption, run `/iterate-parent` again. It resumes from this table.
 
 ## Loop
 
-1. Done check. Stop if it says stop.
-2. If resume skips plan, skip to cloud.
-3. Follow `plan-sub-issue`. If it stops without a child, Stuck.
-4. Follow `cursor-cloud-session` for that child.
-5. After wakeup: re-read the Linear child. `FAILED`/`CANCELLED` or child not Done → stop No progress. Remaining P1 → stop Blocked. Else repeat from 1.
+Enter at the step from Next step.
+
+1. **Stop check.** Stop if it says stop.
+2. **Plan.** Follow `plan-sub-issue` in this session, including user approval. If it ends without a saved child, stop Stuck.
+3. **Implement.** Spawn a subagent with the child URL and parent branch: follow `implement-sub-issue`; return child URL, branch, and status. Wait for it.
+4. Re-read the child. Not In Review → stop No progress.
+5. **Review.** Spawn a separate subagent with the same inputs: follow `review-sub-issue`; return child URL, branch, status, and remaining P1s. Wait for it.
+6. Re-read the child and its review comment. Not Done, or evidence missing or inaccessible → stop No progress. Remaining P1 → stop Blocked.
+7. Repeat from 1.
+
+Run subagents in the foreground, one at a time, and never while waiting on the user. If a subagent errors or returns nothing, re-read Linear and decide from its state alone.
+
+## Stop check
+
+Re-read the parent Acceptance table and child evidence, and spot-check the running system. Linear child state is not enough.
+
+Stop reasons:
+
+- Complete — every parent Acceptance row is proven on the running system
+- Unsliceable — parent has no observable outcome
+- Stuck — remainder exists but does not fit one child
+- Blocked — last review left a P1
+- No progress — a step ended without advancing its child
+- Awaiting approval — the user has not approved the child draft
+- Cap — named cap reached
+
+Reply with the parent URL and the stop reason. Complete means ready for `review-parent`; do not complete the parent.
