@@ -18,7 +18,7 @@ Build a parent feature one child at a time, until its outcome works.
 
 Read the parent (if given a child, use its parent), its children, and all comments. Then do the next thing, and keep going until you need the user:
 
-- **No open child, parent Acceptance not yet covered** → draft the next child (below), save it as Todo, show the user its link and why it comes next, and ask for approval.
+- **No open child, parent Acceptance not yet covered** → draft the next child (below), save it as Todo, show the user its link, the assumption it tests (if any), and why it comes next, and ask for approval.
 - **Todo** → revise on the user's feedback. On approval, move it to In Progress.
 - **In Progress** → run `implement-sub-issue` for it, as a subagent if you can.
 - **In Review** → run `review-sub-issue` for it, as a subagent if you can.
@@ -28,7 +28,12 @@ Do not edit the parent.
 
 ## Drafting a child
 
-The next child is the most valuable unmet part of the parent, or an open question whose answer changes what to build. Use earlier review findings and lessons.
+Pick the next child in this order:
+
+1. **Riskiest assumption first.** Look for what the parent or earlier review lessons take for granted that would change what to build if wrong: an API, performance, a user behavior, a data shape. If one is untested, the next child tests it with the smallest working slice on the running system. Write its Acceptance so that a "no" is still a proven result.
+2. **Then the most valuable unmet Acceptance.**
+
+If an earlier child disproved an assumption, lead the next draft with what that changes, and tell the user if the parent itself may need to change.
 
 A good child:
 - Moves the parent toward its outcome without expanding it.
@@ -40,7 +45,7 @@ Save it in Linear under the parent (same team, project, and priority), using thi
 
 ```markdown
 ## Why this child
-[1–2 sentences: what it covers and why it is next.]
+[1–2 sentences: the riskiest assumption it tests and what changes if it's wrong, or the unmet Acceptance it covers. Why it is next.]
 
 ## Outcome
 [1–2 sentences: what will visibly work afterward.]
