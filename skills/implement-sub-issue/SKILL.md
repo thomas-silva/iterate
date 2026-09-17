@@ -1,32 +1,24 @@
 ---
 name: implement-sub-issue
-description: Implement the approved (In Progress) Linear child of a parent feature. Commit and push on the parent's branch, prove acceptance on the running system, save evidence, then move the child to In Review. Use when the user runs /implement-sub-issue, asks to implement a Linear sub-issue or child issue, or to execute a planned Linear child.
+description: Implement an approved Linear child of a parent feature on the parent's branch, prove it works on the running system, and move it to In Review. Use when the user runs /implement-sub-issue, asks to implement a Linear sub-issue or child issue, or to execute a planned Linear child.
 ---
 
 # Implement Sub-Issue
 
-Build one approved Linear child. The parent is the feature; the child is the next piece of it.
-
-## Resolve
-
-- From the user's Linear URL or ID. If it names the parent, use its open child (not Done or Canceled).
-- Read the parent, the child, and the child's comments, including earlier `Blocked:` notes.
-- Child must be In Progress. Todo means not yet approved; stop and say so. Any other status: stop and report it.
+Build the parent's approved child (In Progress).
 
 ## Workflow
 
-1. Check out the parent's Linear git branch, creating it from the repo default branch if needed. Continue from any commits already there for this child.
-2. Build the child's Outcome, Scope, and Acceptance. Do not expand scope, edit the parent, or create another child.
-3. Commit and push after each working part. Put the child ID in every commit message. Do not open a PR.
-4. Prove every Acceptance row as described in [Proof](#proof).
-5. Save the evidence comment on the child, then move it to In Review. Reply with the child URL, branch, and status.
+1. Read the parent, the child, and the child's comments. If given the parent, work on its open child.
+2. Work on the parent's Linear git branch, created from the repo's base branch if it does not exist.
+3. Build the child's Outcome and Scope. Don't expand it.
+4. Commit and push as you go, with the child ID in each commit message. Don't open a PR.
+5. Prove each Acceptance row (see [Proof](#proof)), save the evidence on the child, and move it to In Review.
 
-If you cannot finish or prove the child, push what works, post `Blocked:` with the reason on the child, leave it In Progress, and stop.
+If the child isn't approved yet, or you get stuck, stop and tell the user why.
 
 ## Proof
 
-Shared by every skill in this repo.
+Proven means seen working on the running system. A Playwright run against the live app counts; unit tests alone don't.
 
-An Acceptance row is proven when it is seen working on the running system. A Playwright run against the live app counts; unit tests or mocks alone do not.
-
-Save one Linear comment on the issue being worked on that maps each row to its result and proof, with the tested commit SHA and environment. Attach screenshots or link durable logs and recordings; local file paths do not count. Read the comment back and check its links open.
+Save a Linear comment mapping each Acceptance row to what you saw, with the commit SHA and screenshots or links that others can open.

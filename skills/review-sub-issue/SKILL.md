@@ -1,53 +1,24 @@
 ---
 name: review-sub-issue
-description: Review the In Review Linear child of a parent feature in code and on the running system. Fix in-scope findings with simplification as a core criterion, save evidence, and move the child to Done only when acceptance is proven and no P1 remains. Use when the user runs /review-sub-issue, asks to review a Linear sub-issue or child issue, or to review a Linear child's implementation.
+description: Review an implemented Linear child of a parent feature in code and on the running system, fix and simplify what belongs to it, and move it to Done when proven. Use when the user runs /review-sub-issue, asks to review a Linear sub-issue or child issue, or to review a Linear child's implementation.
 ---
 
 # Review Sub-Issue
 
-Review one built Linear child, fix what is in scope, and decide whether it is Done. The parent is the feature; the child is the next piece of it.
-
-## Resolve
-
-- From the user's Linear URL or ID. If it names the parent, use its open child (not Done or Canceled).
-- Read the parent, the child, and the child's comments.
-- Child must be In Review. Otherwise stop and report its status.
+Review the parent's built child (In Review) with fresh eyes, and fix what belongs to it.
 
 ## Workflow
 
-1. Find the child's commits on the parent branch (`git log --grep <child ID>`). Review them, reading nearby code as needed.
-2. Check every Acceptance row as described in [Proof](../implement-sub-issue/SKILL.md#proof). A row you cannot check is a finding.
-3. Review against the criteria below and rank findings.
-4. Fix in-scope findings, preferring deletion, consolidation, or reuse; otherwise the smallest correct change. Commit and push with the child ID in the message. Re-check affected rows.
-5. Save one comment on the child: outcome, proof, lessons for the next child, and remaining findings with their P labels (or "none").
-6. No P1 left and every row proven → move the child to Done. Otherwise post `Blocked:` naming each open P1 or unproven row, leave the child In Review, and stop. The user can resolve it, or accept it by moving the child to Done.
-7. Reply with the child URL, branch, and status.
+1. Read the parent, the child, and the child's comments. If given the parent, work on its open child.
+2. Review the child's commits (`git log --grep <child ID>`) and check each Acceptance row on the running system (see [Proof](../implement-sub-issue/SKILL.md#proof)).
+3. Fix what belongs to this child, simplifying where it helps. Commit and push with the child ID.
+4. Comment on the child: what works, the proof, lessons for the next child, and anything left for later.
+5. Proven, with no P1 left → move it to Done. Otherwise stop and tell the user why.
 
-Do not edit the parent or create another child. Do not open a PR.
+## What to look for
 
-## Criteria
+- **Fit**: does what the child and parent intend; nothing missing, extra, or conflicting.
+- **Architecture**: clear ownership and data flow; fits the project; no duplicate paths or needless abstractions.
+- **Simplification**, even when it works: prefer deleting, merging, or reusing over adding. Skip cosmetic rewrites.
 
-Alignment:
-- Matches the parent's outcome and boundaries, and the child's Outcome and Scope.
-- Flag missing, extra, or conflicting behavior.
-
-Architecture:
-- Clear ownership, boundaries, data flow, and single sources of truth; fits the project's existing architecture.
-- Flag duplicated ownership, parallel paths, leaky boundaries, needless coupling, and unneeded abstractions.
-
-Simplification (core, even when behavior is correct):
-- Prefer deletion, consolidation, and reuse over new machinery.
-- Fewer states, branches, and indirection; one change that fixes several findings.
-- Only for a concrete reduction in complexity; skip cosmetic rewrites.
-
-## Findings
-
-- **P1**: blocks the child's outcome or breaks the intended architecture. The child cannot be Done.
-- **P2**: real architecture, compatibility, or maintenance risk.
-- **P3**: worthwhile simplification.
-
-```markdown
-- P1 — `path:line` or `live:<surface>` — [Issue]. [Consequence]. Fix: [simplest correction].
-```
-
-Actionable issues only; no praise or style nits.
+Rank findings: **P1** breaks the outcome or the architecture; **P2** real maintenance risk; **P3** worthwhile simplification. Actionable issues only.

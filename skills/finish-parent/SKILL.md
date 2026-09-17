@@ -1,61 +1,47 @@
 ---
 name: finish-parent
-description: Finish a Linear parent feature whose children are all Done. Review the combined implementation end to end, fix in-scope findings, prove parent Acceptance, then open or update one PR and move the parent to In Review. Use when the user runs /finish-parent, or asks to review a whole parent feature, prepare it for PR review, or propose it.
+description: Finish a Linear parent feature once its children are done. Review the combined implementation end to end, fix what belongs to the feature, prove the parent's Acceptance, open or update one PR, and move the parent to In Review. Use when the user runs /finish-parent, or asks to review a whole parent feature or prepare it for PR review.
 ---
 
 # Finish Parent
 
-Review the whole feature, then propose it as one PR. Individual children were already reviewed; this checks that they work together.
-
-## Resolve
-
-- From the user's Linear URL or ID. If it names a child, use its parent.
-- Read the parent, its children, and their comments.
-- Any open child (not Done or Canceled) → stop; the feature is not finished.
-- Use the parent's Linear git branch. PR base: the base the user named, else the repo's documented base, else the default branch. Read the repo's PR guidance and any open PR for the branch.
+Check that the children work together as one feature, then propose it as one PR.
 
 ## Workflow
 
-1. Read the combined diff against the base, with nearby code for context.
-2. Prove every parent Acceptance row as described in [Proof](../implement-sub-issue/SKILL.md#proof). Reuse child evidence where it still holds; re-check where later changes could have broken it.
-3. Review against the criteria below. Fix in-scope findings, preferring deletion, consolidation, or reuse. Commit and push with the parent ID in the message, then re-check affected rows.
-4. Save one comment on the parent: tested commit, Acceptance proof, findings fixed, and findings remaining.
-5. Unproven rows, or a remaining finding that breaks the parent outcome or intended architecture → post `Blocked:` with the reason on the parent and stop without a PR.
-6. If the user asked for a review only, stop here and report.
-7. Write the PR from the template, adapted to the repo's PR guidance. Create it, or update the open PR for the branch. Read it back and check the base, head, and that every link and image opens.
-8. Comment the PR link on the parent and move the parent to In Review, whatever open status it had. Do not merge or mark it Done.
-9. Reply with the PR URL, parent URL, and the parent's actual status. Never claim a step that failed.
+1. Read the parent, its children, and their comments. If given a child, use its parent.
+2. Review the parent branch's combined diff against the repo's base branch.
+3. Prove each parent Acceptance row (see [Proof](../implement-sub-issue/SKILL.md#proof)), reusing child evidence where it still holds.
+4. Fix what belongs to the feature, simplifying where it helps. Commit and push with the parent ID. Comment the results on the parent.
+5. If something can't be fixed here, stop and tell the user why. It can become the next child.
+6. Open or update the PR using the template and the repo's PR guidance. Check that its links and images open.
+7. Link the PR on the parent and move the parent to In Review. Don't merge or mark it Done.
 
-## Criteria
+## What to look for
 
-- **Outcome**: the combined feature delivers the parent's outcome and Acceptance end to end.
-- **Integration**: children agree on interfaces, shared state, and assumptions; failure paths work across them.
-- **Simplification**: no duplicate mechanisms, conflicting approaches, or leftover intermediate code between children. Only changes with a concrete benefit.
-- **Regressions**: existing behavior touched by the diff still works; choose focused checks.
+- The feature delivers the parent's outcome end to end.
+- Children agree on interfaces and shared state.
+- No duplicate mechanisms or leftover intermediate code between children.
+- Existing behavior touched by the diff still works.
 
 ## PR template
 
-Lead with what users can now do. Omit empty sections and work history.
-
 ```markdown
 ## Outcome
-[What users can now do; a before/after example when useful.]
+[What users can now do.]
 
 ## Implementation
-[Main design choices and tradeoffs, from the final diff.]
+[Main design choices and tradeoffs.]
 
 ## Evidence
-Tested commit: [SHA]. Environment: [running system and fixture].
+Tested commit: [SHA].
 
 | Parent acceptance | Result | Proof |
 |---|---|---|
-| [Criterion] | [What was observed] | [Link] |
-
-[A few screenshots or recordings, each with a caption saying what it shows.]
+| [Criterion] | [What was seen] | [Link] |
 
 ## Limitations
-[Known constraints or deferred work; omit when none.]
+[Omit when none.]
 
-Parent: [link]
-Children: [links]
+Parent: [link] · Children: [links]
 ```
