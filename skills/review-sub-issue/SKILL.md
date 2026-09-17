@@ -1,68 +1,53 @@
 ---
 name: review-sub-issue
-description: Review one implemented Linear child issue for alignment, architecture, worthwhile simplification, and live-system acceptance. Fix in-scope findings, prefer simplification, commit and push, then comment the evidence and what remains on the issue. Use when the user runs /review-sub-issue, asks to review a Linear sub-issue or child issue, or to review-step a Linear issue.
+description: Review the In Review Linear child of a parent feature in code and on the running system. Fix in-scope findings with simplification as a core criterion, save evidence, and move the child to Done only when acceptance is proven and no P1 remains. Use when the user runs /review-sub-issue, asks to review a Linear sub-issue or child issue, or to review a Linear child's implementation.
 ---
 
 # Review Sub-Issue
 
-Review one implemented Linear child in code and on the running system. Fix in-scope findings, simplify where worthwhile, and comment the evidence and what remains. The parent issue is the feature goal; the child is the next piece of it.
+Review one built Linear child, fix what is in scope, and decide whether it is Done. The parent is the feature; the child is the next piece of it.
 
 ## Resolve
 
-- From the user's Linear URL or ID.
-- Issue has a parent → that issue is the child; its parent is the feature.
-- Issue has no parent → it is the feature. Target the incomplete child.
-- Read parent, target child, siblings, and comments (`get_issue`, `list_issues` with `parentId`, `list_comments`).
-- If the child is Done or Canceled, stop and report its status.
-- If there is no implementation to review, stop.
+- From the user's Linear URL or ID. If it names the parent, use its open child (not Done or Canceled).
+- Read the parent, the child, and the child's comments.
+- Child must be In Review. Otherwise stop and report its status.
 
 ## Workflow
 
-1. Identify the target child's implementation commits on the parent's git branch using its issue, evidence comments, and git history. Review the changes for that child, reading adjacent code as needed for context. If the child's changes cannot be identified reliably, report the ambiguity and stop.
-2. Run the child's Acceptance `Proven by` rows as described in [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence). Unreachable live surfaces are findings.
-3. Review alignment, architecture, simplification, and live evidence.
-4. Output ranked findings. If none, skip to 7.
-5. Fix all in-scope findings, including worthwhile simplifications, limited to the child and required adjacent code. First consider deletion, consolidation, or reuse; otherwise make the smallest correction that satisfies the intended behavior. Leave out-of-scope findings as comments.
-6. Re-review the changes and re-run affected acceptance checks. If an in-scope finding cannot be resolved or acceptance remains unproven, save the evidence and blocker in a child comment, report it, and stop without marking the child Done.
-7. Commit and push remaining changes on the parent branch. Do not open a PR.
-8. `save_comment` on the child with the demonstrated outcome, acceptance evidence, lessons that affect the next child, and remaining findings (or none). Follow [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence), using results from this review against the final tested commit. Save and verify this even when review finds no issues; only then set the child to Done. Do not edit the parent or create a sibling.
-9. Reply with the child URL, branch, status, and remaining P1s.
+1. Find the child's commits on the parent branch (`git log --grep <child ID>`). Review them, reading nearby code as needed.
+2. Check every Acceptance row as described in [Proof](../implement-sub-issue/SKILL.md#proof). A row you cannot check is a finding.
+3. Review against the criteria below and rank findings.
+4. Fix in-scope findings, preferring deletion, consolidation, or reuse; otherwise the smallest correct change. Commit and push with the child ID in the message. Re-check affected rows.
+5. Save one comment on the child: outcome, proof, lessons for the next child, and remaining findings with their P labels (or "none").
+6. No P1 left and every row proven → move the child to Done. Otherwise post `Blocked:` naming each open P1 or unproven row, leave the child In Review, and stop. The user can resolve it, or accept it by moving the child to Done.
+7. Reply with the child URL, branch, and status.
 
-## Review criteria
+Do not edit the parent or create another child. Do not open a PR.
+
+## Criteria
 
 Alignment:
-- Match the parent's outcome, boundaries, and evaluation intent.
-- Match the child's intended outcome, scope, and guardrails.
-- Flag omitted, extra, or conflicting behavior.
+- Matches the parent's outcome and boundaries, and the child's Outcome and Scope.
+- Flag missing, extra, or conflicting behavior.
 
 Architecture:
-- Preserve clear ownership, boundaries, data flow, and sources of truth.
-- Fit established project architecture unless the parent explicitly changes it.
-- Flag duplicated ownership, parallel paths, boundary leaks, avoidable coupling, and unsupported abstractions.
+- Clear ownership, boundaries, data flow, and single sources of truth; fits the project's existing architecture.
+- Flag duplicated ownership, parallel paths, leaky boundaries, needless coupling, and unneeded abstractions.
 
-Simplification:
-- Look for worthwhile simplification even when behavior is correct; it is a core review criterion.
-- Prefer deletion, consolidation, and reuse over added machinery.
-- Reduce states, branches, indirection, and duplicated decisions.
-- Prefer one simplification that resolves several findings.
-- Preserve intended behavior and scope. Require a concrete reduction in complexity or maintenance burden; omit cosmetic rewrites and speculative abstractions.
-
-Live:
-- The child's Acceptance rows pass under [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence).
-- Flag failed, skipped, or unproven rows.
+Simplification (core, even when behavior is correct):
+- Prefer deletion, consolidation, and reuse over new machinery.
+- Fewer states, branches, and indirection; one change that fixes several findings.
+- Only for a concrete reduction in complexity; skip cosmetic rewrites.
 
 ## Findings
 
-Rank by consequence:
-
-- `P1`: Blocks the expected outcome or contradicts the intended architecture.
-- `P2`: Creates material architectural, compatibility, or maintenance risk.
-- `P3`: Identifies worthwhile child-local simplification.
-
-Shape:
+- **P1**: blocks the child's outcome or breaks the intended architecture. The child cannot be Done.
+- **P2**: real architecture, compatibility, or maintenance risk.
+- **P3**: worthwhile simplification.
 
 ```markdown
-- P1 — `path:line` | `live:surface` — [Issue]. [Consequence]. Simplest correction: [Action].
+- P1 — `path:line` or `live:<surface>` — [Issue]. [Consequence]. Fix: [simplest correction].
 ```
 
-Within findings, include actionable issues only. Omit praise and style nits.
+Actionable issues only; no praise or style nits.

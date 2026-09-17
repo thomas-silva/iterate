@@ -1,84 +1,57 @@
 ---
 name: plan-sub-issue
-description: Create or revise the next Linear child issue as the next one-agent-pass advancing task under a parent Linear issue treated as the feature goal. Use when the user runs /plan-sub-issue, asks for the next Linear sub-issue or child issue, or to break a Linear issue into the next advancing task.
+description: Draft the next Linear child issue under a parent feature, save it as Todo, and get the user's approval before it moves to In Progress. No code. Use when the user runs /plan-sub-issue, asks for the next Linear sub-issue or child issue, or to break a Linear issue into the next piece of work.
 ---
 
 # Plan Sub-Issue
 
-**Every child draft needs the real user's approval before anything proceeds.** Reach the user in the best way your platform allows: ask in the conversation, use a question or notification tool, or leave a comment where they will see it. Only the user can approve. Never approve on their behalf, treat silence as approval, or let a subagent approve. Run nothing while waiting. If you cannot reach the user, stop with Awaiting approval and include the draft in your reply.
+Draft one Linear child: the next piece of the parent feature, small enough for one agent to finish in one session. No code.
 
-Create or revise one Linear child issue. NO code. The parent issue is the feature goal; the child is the next piece of it.
+**Only the user can approve a child.** Ask them in the best way your platform allows: in the conversation, with a question or notification tool, or on the child in Linear. Never approve on their behalf or treat silence as approval. Approval means the user says so explicitly, or moves the child to In Progress themselves.
 
-## Guidelines
+## Resolve
 
-- Resolve the parent from the user's Linear URL or ID. If that issue already has a parent, the parent is the feature unless the user named the child to revise.
-- Read the parent (`get_issue`, include relations). Read its comments. List children (`list_issues` with `parentId`).
-- Read the latest child's review comments and relevant sibling comments (`list_comments`). Use demonstrated outcomes, evidence, lessons, and remaining findings to choose the next child.
-- Inspect the repo only enough to name live eval surfaces. Use `./fixtures/` when present; do not invent fixtures.
-- An incomplete child exists → revise it. All children completed/canceled, or none → create the next. Never a second in-flight child.
-- Inherit team, project, and priority from the parent. Do not edit the parent.
-- Reference the parent; do not repeat its stories, acceptance, or out-of-scope.
-- No implementation details, file inventories, or code-level prescriptions.
-- Write only the Linear child, and only after the user approves the draft.
+- From the user's Linear URL or ID. If it names a child, use its parent.
+- Read the parent, its children, and their comments. Use Done children's evidence, lessons, and remaining findings to choose what comes next.
+- Open child (not Done or Canceled) in Todo → revise it. Open child in any other status → stop; it is already approved.
+- Parent has no observable outcome, or the remaining work cannot fit one child → post `Blocked:` with the reason on the parent and stop.
+- Every parent Acceptance row already proven → stop; nothing left to plan.
 
-## Sub-issue standard
+## A good child
 
-Each child must:
-
-- Cover a subset of unmet parent Acceptance, or a Risk whose answer would change what to build.
-- Not contradict parent boundaries or Out of Scope, or repeat/expand the parent.
-- Produce an outcome another agent can evaluate end to end on a running system (not tests alone). Define in/out without prescribing code.
-- Stay feasible in one agent pass.
-- Be provable under [Proof and evidence](../implement-sub-issue/SKILL.md#proof-and-evidence).
-
-## Scoping rubric
-
-One dominant theme, bounded blast radius, compatibility/reversibility only when step-specific. A material uncertainty (its answer would change what to build) → Risk; else Coverage. Not this child: unmet parent acceptance → Deferred; another issue → omit; never this feature → parent Out of Scope (do not edit the parent).
+- Covers some unmet parent Acceptance, or answers an open question whose answer would change what to build.
+- Stays inside the parent's scope; does not repeat or expand it.
+- Has one theme and an outcome someone can check on the running system.
+- Describes behavior, not code: no file lists or implementation steps.
 
 ## Workflow
 
-1. Load parent, comments, and children.
-2. If the parent has no observable outcome, stop. The parent needs that first.
-3. Choose Risk or Coverage from remaining parent acceptance vs children vs what the product actually does.
-4. Title is the observable delta. Not "Implement…", not "Phase N".
-5. Present the draft (title + description) and get the user's approval as described at the top. Do not `save_issue` before approval.
-6. On approval, `save_issue`: create with `parentId`, `team`, `project`, and `priority` from the parent, `state` In Progress; or update the in-flight child. Description uses the template.
-7. Reply with the child URL and one sentence on why this slice is next.
+1. Draft the title and description from the template. The title is the observable change, not "Implement…" or "Phase N".
+2. `save_issue`: create with `parentId` and the parent's `team`, `project`, and `priority`, `state` Todo; or update the open Todo child.
+3. Ask the user to approve, showing the draft and child URL. Revise on feedback and ask again.
+4. On explicit approval, set the child to In Progress. Without it, leave it in Todo.
+5. Reply with the child URL, its status, and one sentence on why this child is next.
 
 ## Template
 
-Child issue description:
-
 ```markdown
-## Why this step
-Mode: Risk | Coverage
+## Why this child
+[1–2 sentences: which unmet parent Acceptance or open question this covers, and why it is next.]
 
-[1–2 sentences: current uncertainty or coverage gap, why it is next, what later decision its evidence unlocks.]
-
-## Intended outcome
-[1–2 sentences: observable end-to-end delta in one agent pass. No proof mechanics.]
-
-## Step-specific approach
-[Only when needed. Choice plus rationale not already on the parent. 0–2 bullets.]
+## Outcome
+[1–2 sentences: what will visibly work afterward.]
 
 ## Scope
 Included:
-- [Semantic deliverable or behavior.]
-- [2–4 bullets total.]
+- [2–4 behaviors or deliverables.]
 
-Deferred:
-- [Unmet parent acceptance this child does not cover, only if a reader would expect it in this pass.]
-- [Omit the heading when none.]
-
-Guardrails:
-- [Only step-specific compatibility or reversibility not already on the parent.]
+Not included:
+- [Parent Acceptance a reader might expect here but a later child covers. Omit when none.]
 
 ## Acceptance
-[Optional: one `diagram-dataflow` per distinct live evaluation flow when the table cannot show the relationship.]
-
 | Done when | Proven by |
 |---|---|
-| [Binary observable criterion] | [Live surface, fixture, expected evidence] |
+| [Yes/no observable criterion] | [Where to check it on the running system, and what evidence to save] |
 
-[3–5 rows. At least one row exercises the running system end to end.]
+[3–5 rows. At least one checks the running system end to end.]
 ```

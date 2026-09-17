@@ -2,48 +2,59 @@
 
 Agent skills for building a Linear feature one child issue at a time.
 
-A **parent issue** is the feature. A **child issue** is the next piece one agent can finish.
+A **parent issue** is the feature. A **child issue** is the next piece, small enough for one agent to finish in one session.
 
-**Every child plan waits for your approval before any work starts.** The agent asks you in whatever way its platform allows. If it can't reach you, it stops and shows you the draft.
+**Every child waits for your approval before any work starts.** The agent saves its plan as a Todo child and asks you in whatever way its platform allows. Approve by saying so, or by moving the child to In Progress yourself.
 
-`/iterate-parent` runs the loop. The main agent plans each child with you, then runs implement and review as separate subagents.
+## How it works
+
+The child's Linear status is the whole process. Each skill moves the one open child forward one step:
+
+| Status | Meaning | Skill that moves it on |
+|---|---|---|
+| Todo | Draft waiting for your approval | `plan-sub-issue` → In Progress when you approve |
+| In Progress | Approved; being built | `implement-sub-issue` → In Review |
+| In Review | Built; being reviewed | `review-sub-issue` → Done |
+| Done | Reviewed, proven, no blocking issue (P1) left | — |
+
+If a skill can't move the child forward, it leaves the status as it is and posts a comment starting `Blocked:` explaining why.
+
+`/iterate-parent` runs the loop: read the open child's status, run that skill, check the status moved, repeat.
 
 ```mermaid
 flowchart LR
-    Parent["Parent issue"] --> Check{"Stop check"}
-    Check -->|More work needed| Plan["Plan child"]
-    Plan --> Approval{"Your approval"}
-    Approval -->|Approved| Implement["Implement subagent"]
-    Implement --> Review["Review subagent"]
-    Review --> Check
-    Check -->|Parent Acceptance proven| Done["Ready for /review-parent"]
+    Start["/iterate-parent"] --> Open{"Open child?"}
+    Open -->|No, and parent proven| Complete["Complete → /finish-parent"]
+    Open -->|No| Plan["Plan → Todo"]
+    Open -->|Yes| Run["Run skill for its status"]
+    Plan --> Run
+    Run --> Moved{"Status moved?"}
+    Moved -->|Yes| Open
+    Moved -->|No| Needs["Needs you: approval or Blocked comment"]
 ```
 
-Any failure (no progress, a P1 left by review, no approval) stops the loop with a reason.
+It stops for one of three reasons: **Complete**, **Needs you**, or **Cap** (20 children per run by default).
 
-All children share one branch, the parent's Linear git branch. Implement and review commit and push on it. Children do not open PRs.
+All children share the parent's Linear git branch, and every commit names its issue ID. Children don't open PRs. Because Linear and that branch hold all state, you can re-run `/iterate-parent` after any crash. It runs in any agent. Implement and review run as subagents where the agent supports them, on your machine or in a cloud session.
 
-Linear and that branch are the only state. If a session crashes or closes, run `/iterate-parent` again and it picks up at the right step. It runs in any agent with subagents, on your machine or in a cloud session.
-
-When the loop finishes, `/review-parent` checks the combined feature and saves a verdict on the parent. Then `/propose-parent` opens the PR and moves the parent to In Review. Nothing marks the parent Done.
+When the loop reports Complete, `/finish-parent` reviews the whole feature, opens one PR, and moves the parent to In Review. Nothing marks the parent Done.
 
 ## Skills
 
 | Skill | What it does |
 |---|---|
-| [`iterate-parent`](skills/iterate-parent/SKILL.md) | The loop: stop check, plan with your approval, implement subagent, review subagent. Cap 20. |
-| [`plan-sub-issue`](skills/plan-sub-issue/SKILL.md) | Drafts the next child. No code. Saves only after you approve. |
-| [`implement-sub-issue`](skills/implement-sub-issue/SKILL.md) | Builds the child on the parent branch, proves acceptance on the running system, pushes, sets In Review. Holds the shared proof and evidence rules. |
-| [`review-sub-issue`](skills/review-sub-issue/SKILL.md) | Reviews the child on the running system, fixes in-scope findings (simplification is a core criterion), saves evidence, sets Done. |
-| [`review-parent`](skills/review-parent/SKILL.md) | Reviews the whole feature and saves a ready-to-propose or blocked verdict on the parent. |
-| [`propose-parent`](skills/propose-parent/SKILL.md) | Requires that verdict, then opens or updates the PR and moves the parent to In Review. |
+| [`iterate-parent`](skills/iterate-parent/SKILL.md) | The loop described above. |
+| [`plan-sub-issue`](skills/plan-sub-issue/SKILL.md) | Drafts the next child as Todo and gets your approval. No code. |
+| [`implement-sub-issue`](skills/implement-sub-issue/SKILL.md) | Builds the approved child, proves it on the running system, moves it to In Review. Defines what counts as proof. |
+| [`review-sub-issue`](skills/review-sub-issue/SKILL.md) | Reviews and simplifies the child, moves it to Done when proven with no P1 left. |
+| [`finish-parent`](skills/finish-parent/SKILL.md) | Reviews the whole feature, opens or updates the PR, moves the parent to In Review. |
 
 Canonical files live in `skills/`. `.cursor/skills/` links to the same folders for agents that only scan the repo.
 
 ## You need
 
 - [Linear](https://linear.app) connected to the agent (MCP)
-- A parent issue that already names an observable outcome
+- A parent issue with an observable outcome and an Acceptance table
 - Playwright, if a child has UI acceptance rows
 
 ## Install
